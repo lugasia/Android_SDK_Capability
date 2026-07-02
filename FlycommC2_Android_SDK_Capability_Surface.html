@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlycommC2 — Android SDK Capability Surface (Kotlin)</title>
+<style>
+  :root {
+    --navy: #0B3D91;
+    --navy-dark: #082C6B;
+    --navy-light: #1F4E79;
+    --cyan: #00B4D8;
+    --cyan-light: #90E0EF;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --bg: #FAFBFD;
+    --bg-card: #FFFFFF;
+    --bg-code: #F4F6F8;
+    --bg-header: #D9E2F3;
+    --bg-alt: #F8FAFC;
+    --border: #E5E7EB;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+
+    --good-bg: #DCFCE7;
+    --good-text: #166534;
+    --warn-bg: #FEF3C7;
+    --warn-text: #92400E;
+    --bad-bg: #FEE2E2;
+    --bad-text: #991B1B;
+    --na-bg: #F3F4F6;
+    --na-text: #4B5563;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    max-width: 1440px;
+    margin: 0 auto;
+    gap: 0;
+  }
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 18px 28px 28px;
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    font-size: 13.5px;
+  }
+  nav.toc .brand { color: var(--navy); font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  nav.toc .brand-sub { color: var(--text-muted); font-size: 11.5px; margin-bottom: 20px; letter-spacing: 0.05em; text-transform: uppercase; }
+  nav.toc ol { list-style: none; padding: 0; margin: 0; }
+  nav.toc ol > li { margin: 6px 0; }
+  nav.toc ol > li > a { display: block; padding: 5px 8px; border-radius: 4px; color: var(--text); text-decoration: none; transition: background 0.15s, color 0.15s; }
+  nav.toc ol > li > a:hover { background: var(--bg-alt); color: var(--navy); }
+  nav.toc ol ol { margin-top: 4px; padding-left: 12px; border-left: 1px solid var(--border); }
+  nav.toc ol ol > li > a { color: var(--text-muted); font-size: 12.5px; padding: 3px 8px; }
+  main { padding: 40px 56px 80px; max-width: 1060px; }
+  header.doc-hdr { border-bottom: 3px solid var(--navy); padding-bottom: 20px; margin-bottom: 28px; }
+  header.doc-hdr h1 { color: var(--navy); font-size: 30px; line-height: 1.2; margin: 0 0 10px; font-weight: 700; }
+  header.doc-hdr .subtitle { color: var(--text-muted); font-size: 14.5px; margin: 0; }
+  h1, h2, h3, h4 { color: var(--navy); font-weight: 600; }
+  h1.section { font-size: 24px; margin: 50px 0 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+  h1.section:first-of-type { border-top: none; }
+  h2 { font-size: 18px; color: var(--navy-light); margin: 28px 0 10px; }
+  h3 { font-size: 15px; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.04em; margin: 22px 0 8px; }
+  p { margin: 0 0 12px; }
+  strong { color: var(--text); font-weight: 600; }
+  code, .mono {
+    font-family: "JetBrains Mono", "SF Mono", Consolas, Monaco, monospace;
+    font-size: 0.9em; color: #243B53; background: var(--bg-code);
+    padding: 1px 5px; border-radius: 3px; border: 1px solid var(--border);
+  }
+  pre.seq {
+    background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 18px; overflow-x: auto;
+    font-family: "JetBrains Mono", "SF Mono", Consolas, Monaco, monospace;
+    font-size: 12.5px; line-height: 1.45; color: #243B53; margin: 14px 0 20px; box-shadow: var(--shadow);
+  }
+  .callout { padding: 14px 18px; border-radius: 6px; margin: 14px 0 20px; border-left: 4px solid; box-shadow: var(--shadow); }
+  .callout.warn  { background: #FFF8E7; border-color: #D97706; color: #7C2D12; }
+  .callout.info  { background: #EFF6FF; border-color: var(--cyan); color: #1E3A8A; }
+  .callout.good  { background: #ECFDF5; border-color: #059669; color: #064E3B; }
+  .callout strong { color: inherit; }
+  .table-wrap { overflow-x: auto; margin: 12px 0 22px; box-shadow: var(--shadow); border-radius: 6px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; background: var(--bg-card); font-size: 13px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  thead th { background: var(--bg-header); color: var(--navy-dark); font-weight: 600; border-bottom: 2px solid var(--navy); white-space: nowrap; }
+  tbody tr:nth-child(even) td { background: var(--bg-alt); }
+  tbody tr:hover td { background: #F0F4FA; }
+  td code { font-size: 0.9em; }
+  /* Exposure status badges */
+  .status { display: inline-block; padding: 2px 9px; border-radius: 12px; font-family: "JetBrains Mono","SF Mono",Consolas,monospace; font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; }
+  .status.works   { background: var(--good-bg); color: var(--good-text); }
+  .status.limited { background: var(--warn-bg); color: var(--warn-text); }
+  .status.dead    { background: var(--bad-bg);  color: var(--bad-text);  }
+  .status.na      { background: var(--na-bg);   color: var(--na-text);   }
+  /* Privilege-tier badges */
+  .tier { display: inline-block; padding: 2px 8px; border-radius: 4px; font-family: "JetBrains Mono","SF Mono",Consolas,monospace; font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap; border: 1px solid transparent; }
+  .tier.normal   { background: #DCFCE7; color: #166534; border-color:#86EFAC; }
+  .tier.loc      { background: #E0F2FE; color: #075985; border-color:#7DD3FC; }
+  .tier.carrier  { background: #FEF3C7; color: #92400E; border-color:#FCD34D; }
+  .tier.system   { background: #FEE2E2; color: #991B1B; border-color:#FCA5A5; }
+  .tier.aosp     { background: #EDE9FE; color: #5B21B6; border-color:#C4B5FD; }
+  .api { display:inline-block; font-family:"JetBrains Mono","SF Mono",Consolas,monospace; font-size:11px; color:var(--navy-dark); background:#EAF0FA; border:1px solid #CBD9EE; border-radius:3px; padding:1px 6px; white-space:nowrap; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin: 5px 0; }
+  .gen-banner { display: inline-block; background: var(--navy); color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; margin-right: 8px; vertical-align: middle; }
+  .headline { background: linear-gradient(135deg, #FFF3D6 0%, #FEF3C7 100%); border-left: 4px solid #D97706; padding: 14px 18px; border-radius: 6px; color: #7C2D12; margin: 0 0 28px; font-size: 14px; box-shadow: var(--shadow); }
+  .headline strong { color: #7C2D12; }
+  .legend-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:10px; margin:12px 0 22px; }
+  .legend-card { border:1px solid var(--border); border-radius:6px; padding:12px 14px; background:var(--bg-card); box-shadow:var(--shadow); font-size:13px; }
+  footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 12.5px; }
+  @media print {
+    body { font-size: 10pt; background: white; }
+    nav.toc { display: none; }
+    .layout { grid-template-columns: 1fr; max-width: none; }
+    main { padding: 0; max-width: none; }
+    pre.seq { font-size: 8pt; box-shadow: none; }
+    .table-wrap { box-shadow: none; }
+    h1.section { page-break-before: always; }
+    h1.section:first-of-type { page-break-before: avoid; }
+  }
+  @media (max-width: 950px) { .layout { grid-template-columns: 1fr; } nav.toc { display: none; } main { padding: 24px; } }
+  section { scroll-margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ─────────────── TOC ─────────────── -->
+<nav class="toc">
+  <div class="brand">FlycommC2</div>
+  <div class="brand-sub">Android SDK Capability Surface</div>
+  <ol>
+    <li><a href="#overview">Scope &amp; headline finding</a></li>
+    <li><a href="#howto">How to read this doc</a></li>
+    <li><a href="#tiers">1. Privilege-tier model</a></li>
+    <li><a href="#cellular">2. Cellular — identity, signal, state</a>
+      <ol>
+        <li><a href="#cell-mgr">TelephonyManager</a></li>
+        <li><a href="#cell-cb">TelephonyCallback</a></li>
+        <li><a href="#cell-phys">PhysicalChannelConfig</a></li>
+        <li><a href="#cell-gaps">Not exposed</a></li>
+      </ol>
+    </li>
+    <li><a href="#roaming">3. Roaming &amp; registration</a></li>
+    <li><a href="#wifi">4. Wi-Fi</a>
+      <ol>
+        <li><a href="#wifi-mgr">WifiManager / ScanResult / WifiInfo</a></li>
+        <li><a href="#wifi-rtt">WifiRttManager (802.11mc)</a></li>
+        <li><a href="#wifi-gaps">Not exposed / gated</a></li>
+      </ol>
+    </li>
+    <li><a href="#gnss">5. GNSS &amp; location</a>
+      <ol>
+        <li><a href="#gnss-mgr">LocationManager entry points</a></li>
+        <li><a href="#gnss-raw">Raw measurements &amp; AGC</a></li>
+        <li><a href="#gnss-status">Status, nav message, antenna</a></li>
+        <li><a href="#gnss-spoof">Spoofing / jamming signals</a></li>
+      </ol>
+    </li>
+    <li><a href="#qos">6. QoS</a>
+      <ol>
+        <li><a href="#qos-caps">NetworkCapabilities (public)</a></li>
+        <li><a href="#qos-cb">QosCallback (SystemApi)</a></li>
+        <li><a href="#qos-gaps">Not exposed</a></li>
+      </ol>
+    </li>
+    <li><a href="#sat">7. Satellite — D2C / NTN</a>
+      <ol>
+        <li><a href="#sat-public">Public surface (API 36)</a></li>
+        <li><a href="#sat-detect">NTN detection (API 35)</a></li>
+        <li><a href="#sat-system">System-only surface</a></li>
+      </ol>
+    </li>
+    <li><a href="#v2x">8. V2X</a></li>
+    <li><a href="#matrix">9. Exposed-vs-invisible matrix</a></li>
+    <li><a href="#analysis">10. Analysis mapping</a></li>
+    <li><a href="#recs">11. SDK build recommendations</a></li>
+    <li><a href="#appendix">Appendix — permissions &amp; API cheat-sheet</a></li>
+  </ol>
+</nav>
+
+<!-- ─────────────── MAIN ─────────────── -->
+<main>
+
+<header class="doc-hdr">
+  <h1>FlycommC2 — Android SDK Capability Surface (Kotlin)</h1>
+  <p class="subtitle">A full-function catalog of what the Android platform exposes across cellular, Wi-Fi, roaming, GNSS, QoS, satellite (D2C / NTN) and V2X — and what it structurally does not — for building the FlycommC2 sensing SDK. Every function is tagged with its minimum privilege tier and since-API level.</p>
+</header>
+
+<section id="overview">
+  <p><strong>Scope.</strong> Companion to the <em>Cell Observation Sequence per RAT</em> reference. That doc covers the per-RAT cell-observation pipeline in depth; this one is the horizontal API map — every domain the SDK can sense, the concrete Kotlin/Java entry points, the permission/privilege each needs, and the analytic use (anomaly detection, QoS, GNSS integrity) each unlocks.</p>
+  <p><strong>Target floor.</strong> API 33 (Android 13) as the minimum; each function is annotated with its own since-API so you can raise or lower the floor per feature. Where a capability only appears in API 34/35/36/37 it is called out inline.</p>
+
+  <div class="headline">
+    <strong>Headline finding.</strong> The four sensing domains split cleanly by how much the OS trusts an app.
+    <strong>Wi-Fi, GNSS raw measurements and cellular identity/signal are richly exposed to an ordinary (location-permitted) app.</strong>
+    <strong>Detailed 3GPP QoS (QCI / 5QI / QFI / GBR) is <span class="tier system">SYSTEM</span>-only — the <code>QosCallback</code> API is <code>@SystemApi</code>; a normal app gets only coarse link-bandwidth estimates plus whatever it measures itself.</strong>
+    <strong>Satellite/NTN is almost entirely opaque</strong> — a normal app gets only a "state may have changed" listener (API 36) and a boolean NTN flag (API 35); all real satellite control is <span class="tier system">SYSTEM</span>-only.
+    <strong>C-V2X (PC5 sidelink) is not exposed by any public Android API at all.</strong>
+    Build the SDK around the green tiers; treat the red ones as requiring a privileged fleet build or external hardware.
+  </div>
+</section>
+
+<!-- ─────────────── HOW TO READ ─────────────── -->
+<section id="howto">
+  <h1 class="section">How to read this doc</h1>
+  <p>Every catalog row carries three tags: the <strong>exposure status</strong> (can a real app get this value?), the <strong>minimum privilege tier</strong> required, and the <strong>since-API</strong> level. The privilege tier is the decisive axis — it is what determines "exposed vs not" for your chosen fleet posture.</p>
+
+  <h3>Exposure status</h3>
+  <p>
+    <span class="status works">PUBLIC</span> value available to an app on the stated tier &nbsp;·&nbsp;
+    <span class="status limited">PARTIAL</span> available but degraded — throttled, coarse, vendor-dependent, or some fields null &nbsp;·&nbsp;
+    <span class="status dead">NONE</span> not reachable from an app of the stated build — SystemApi, @hide, or absent &nbsp;·&nbsp;
+    <span class="status na">N/A</span> concept doesn't apply
+  </p>
+
+  <h3>Privilege tiers</h3>
+  <div class="legend-grid">
+    <div class="legend-card"><span class="tier normal">NORMAL</span> &nbsp;Play-Store-installable app. Manifest + runtime permissions only (<code>READ_PHONE_STATE</code>, <code>ACCESS_WIFI_STATE</code>, …). No signing requirement.</div>
+    <div class="legend-card"><span class="tier loc">LOCATION</span> &nbsp;As NORMAL, but additionally requires <code>ACCESS_FINE_LOCATION</code> (and location services on). Most identity/scan data sits here.</div>
+    <div class="legend-card"><span class="tier carrier">CARRIER</span> &nbsp;Carrier privileges granted by rules on the UICC (SIM). No platform signing needed, but you need cooperation of the SIM issuer. Unlocks extra telephony reads/controls.</div>
+    <div class="legend-card"><span class="tier system">SYSTEM</span> &nbsp;Preinstalled/privileged or platform-signed app holding signature-level permissions (e.g. <code>MODIFY_PHONE_STATE</code>, <code>SATELLITE_COMMUNICATION</code>). Feasible on a controlled/MDM fleet, not on the Play Store.</div>
+    <div class="legend-card"><span class="tier aosp">AOSP/HAL</span> &nbsp;Only reachable by modifying the platform itself — custom ROM, vendor RIL/HAL extension, or external radio hardware. Not an app-level path.</div>
+  </div>
+  <p>Reading rule: a row tagged <span class="tier system">SYSTEM</span> or <span class="tier aosp">AOSP/HAL</span> is effectively <span class="status dead">NONE</span> for a Play-Store SDK, and becomes <span class="status works">PUBLIC</span> only if you ship a privileged build. That is the core "exposed vs not" decision.</p>
+</section>
+
+<!-- ─────────────── §1 TIERS ─────────────── -->
+<section id="tiers">
+  <h1 class="section">1. The privilege-tier model in practice</h1>
+  <p>Android gates telemetry on a ladder. The same physical fact (e.g. serving-cell identity) is available at different fidelities depending on where your SDK sits on that ladder. The four practical postures for a FlycommC2 deployment:</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Posture</th><th>Tier reached</th><th>How</th><th>What it unlocks over the tier below</th></tr></thead>
+    <tbody>
+      <tr><td>Consumer SDK (Play Store)</td><td><span class="tier normal">NORMAL</span> + <span class="tier loc">LOCATION</span></td><td>Runtime permission grants</td><td>Full Wi-Fi scan, GNSS raw + AGC, CellInfo identity/signal, coarse link QoS, NTN boolean flag.</td></tr>
+      <tr><td>SIM-partnered SDK</td><td>+ <span class="tier carrier">CARRIER</span></td><td>Carrier privilege rules on the UICC</td><td>Network-scan control, some service-state and configuration reads without platform signing.</td></tr>
+      <tr><td>Managed fleet / MDM build</td><td>+ <span class="tier system">SYSTEM</span></td><td>Preinstalled privileged or platform-signed APK</td><td>Full <code>SatelliteManager</code> (datagrams, pointing, NTN signal strength, modem state), 3GPP QoS session attributes (QCI/5QI/GBR via <code>QosCallback</code>), privileged telephony, richer physical-channel data.</td></tr>
+      <tr><td>Custom device / RSU</td><td>+ <span class="tier aosp">AOSP/HAL</span></td><td>Custom ROM or vendor HAL, or external modem/SDR</td><td>Forced band scans (Pattern-B unlicensed-band), PC5 sidelink / C-V2X, raw IQ, <code>cellBarred</code>, SIB19 NTN ephemeris.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout info">
+    <strong>Design implication.</strong> Ship one SDK core that targets <span class="tier normal">NORMAL</span>+<span class="tier loc">LOCATION</span> and degrades gracefully, then a privileged "extension module" that lights up the <span class="tier system">SYSTEM</span> surface only when the host build grants it. The existing per-RAT doc's SDK-vs-RSU coverage split is exactly this ladder applied to cell scanning.
+  </div>
+</section>
+
+<!-- ─────────────── §2 CELLULAR ─────────────── -->
+<section id="cellular">
+  <h1 class="section"><span class="gen-banner">CELL</span> 2. Cellular — identity, signal, state</h1>
+  <p>The per-cell field mapping (MCC/MNC, TAC/LAC, ECI/NCI, RSRP/RSRQ/SS-SINR, TA, per RAT) is catalogued exhaustively in the companion per-RAT doc. This section lists the <em>access surface</em> — the manager, callbacks and config objects the SDK calls to obtain those fields, plus what stays hidden.</p>
+
+  <h2 id="cell-mgr">2.1 TelephonyManager — the entry point</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Notes / analysis use</th></tr></thead>
+    <tbody>
+      <tr><td>Async cell-info refresh</td><td><code>requestCellInfoUpdate(Executor, CellInfoCallback)</code></td><td><span class="api">29</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Primary poll. Returns <code>List&lt;CellInfo&gt;</code> (serving + neighbors the modem surfaced).</td></tr>
+      <tr><td>Cached cell list</td><td><code>getAllCellInfo()</code></td><td><span class="api">17</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status limited">PARTIAL</span></td><td>May be stale; prefer the async form. Deprecated-in-spirit for live use.</td></tr>
+      <tr><td>Signal strength snapshot</td><td><code>getSignalStrength()</code></td><td><span class="api">28</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Aggregate <code>SignalStrength</code> for the primary serving cell.</td></tr>
+      <tr><td>Service / registration state</td><td><code>getServiceState()</code></td><td><span class="api">26</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Gateway to <code>NetworkRegistrationInfo</code> incl. roaming &amp; NTN (see §3, §7).</td></tr>
+      <tr><td>Data / voice RAT</td><td><code>getDataNetworkType()</code> / <code>getVoiceNetworkType()</code></td><td><span class="api">24</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td><code>READ_PHONE_STATE</code>. Feeds <code>NETWORK_DOWNGRADE</code>.</td></tr>
+      <tr><td>Serving PLMN / SIM PLMN</td><td><code>getNetworkOperator()</code> / <code>getSimOperator()</code></td><td><span class="api">1</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>String MCC+MNC. Feeds <code>MCC_ANOMALY</code>, roaming inference.</td></tr>
+      <tr><td>Registered-network roaming</td><td><code>isNetworkRoaming()</code></td><td><span class="api">22</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Coarse boolean; see §3 for the richer registration view.</td></tr>
+      <tr><td>Active modem count (DSDS)</td><td><code>getActiveModemCount()</code></td><td><span class="api">30</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Enables multi-SIM correlation (per-SIM band authorization — Pattern-B extender).</td></tr>
+      <tr><td>Per-SIM manager</td><td><code>createForSubscriptionId(int)</code></td><td><span class="api">24</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>One <code>TelephonyManager</code> per SIM; compare what each SIM sees.</td></tr>
+      <tr><td>Manual network scan</td><td><code>requestNetworkScan(NetworkScanRequest, …)</code></td><td><span class="api">28</span></td><td><span class="tier carrier">CARRIER</span></td><td><span class="status limited">PARTIAL</span></td><td>Forces a PLMN/band scan. Needs carrier privileges or <code>NETWORK_SCAN</code> (system). Key for unlicensed-band Pattern B.</td></tr>
+      <tr><td>Set preferred RAT</td><td><code>setPreferredNetworkTypeBitmask(...)</code></td><td><span class="api">28</span></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td><td><code>MODIFY_PHONE_STATE</code>. Forcing RAT for downgrade probing is system-only.</td></tr>
+      <tr><td>Baseband / modem info</td><td><code>getManufacturerCode()</code>, <code>getTypeAllocationCode()</code></td><td><span class="api">29</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>TAC/MC of the device modem — fleet fingerprinting.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="cell-cb">2.2 TelephonyCallback — the live event stream (API 31, replaces PhoneStateListener)</h2>
+  <p>From API 31 the SDK registers a single <code>TelephonyCallback</code> and implements only the listener interfaces it needs. This is the push counterpart to the pull methods above and is how you build a continuous sensing loop.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Listener interface</th><th>Delivers</th><th>Tier</th><th>Exposed</th><th>Analysis use</th></tr></thead>
+    <tbody>
+      <tr><td><code>CellInfoListener</code></td><td><code>List&lt;CellInfo&gt;</code> on change</td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Neighbor churn → <code>RAPID_RESELECTION</code>, <code>PCI_COLLISION</code>.</td></tr>
+      <tr><td><code>SignalStrengthsListener</code></td><td><code>SignalStrength</code></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>RSRP/RSRQ/SINR time series → <code>JAMMING_INDICATOR</code>, z-scores.</td></tr>
+      <tr><td><code>ServiceStateListener</code></td><td><code>ServiceState</code></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Reg state, roaming, NTN, operator, channel number.</td></tr>
+      <tr><td><code>DisplayInfoListener</code></td><td><code>TelephonyDisplayInfo</code></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>NR state (NSA/SA, mmWave) &amp; override — 5G-icon logic; RAT-downgrade context.</td></tr>
+      <tr><td><code>PhysicalChannelConfigListener</code></td><td><code>List&lt;PhysicalChannelConfig&gt;</code></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Band, bandwidth, PCI, freq per carrier — richer than CellInfo (see 2.3).</td></tr>
+      <tr><td><code>DataConnectionStateListener</code></td><td>data state + RAT</td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Attach/detach transitions.</td></tr>
+      <tr><td><code>BarringInfoListener</code></td><td><code>BarringInfo</code></td><td><span class="tier loc">LOCATION</span></td><td><span class="status limited">PARTIAL</span></td><td>Per-service access barring. Nearest public analog to SIB <code>cellBarred</code> — but it is <em>your</em> barring state, not the cell's broadcast bit.</td></tr>
+      <tr><td>Custom signal thresholds</td><td><code>SignalStrengthUpdateRequest</code> (API 31)</td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Register dBm thresholds/hysteresis to get callbacks only on meaningful change — battery-cheap jamming watch.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="cell-phys">2.3 PhysicalChannelConfig — band truth without the SIB</h2>
+  <p><code>PhysicalChannelConfig</code> (public API 31, via <code>PhysicalChannelConfigListener</code>) is the most under-used cellular surface. It reports the <em>actual configured</em> physical channel(s), which is a stronger band signal than <code>CellIdentity.getBands()</code> because it reflects what the modem is really tuned to, including secondary carriers.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Field</th><th>Method</th><th>Since</th><th>Exposed</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Band number</td><td><code>getBand()</code></td><td><span class="api">31</span></td><td><span class="status works">PUBLIC</span></td><td>Direct input to <code>UNLICENSED_BAND</code> (Pattern A).</td></tr>
+      <tr><td>DL frequency</td><td><code>getDownlinkFrequencyKhz()</code></td><td><span class="api">31</span></td><td><span class="status works">PUBLIC</span></td><td>Cross-check ARFCN→MHz derivation.</td></tr>
+      <tr><td>Cell bandwidth</td><td><code>getCellBandwidthDownlinkKhz()</code></td><td><span class="api">31</span></td><td><span class="status works">PUBLIC</span></td><td>Narrow-BW rogue cells stand out.</td></tr>
+      <tr><td>PCI</td><td><code>getPhysicalCellId()</code></td><td><span class="api">31</span></td><td><span class="status works">PUBLIC</span></td><td>Corroborate <code>CellIdentity</code> PCI.</td></tr>
+      <tr><td>Connection status</td><td><code>getConnectionStatus()</code></td><td><span class="api">31</span></td><td><span class="status works">PUBLIC</span></td><td>Primary vs secondary serving (CA legs).</td></tr>
+      <tr><td>RAT</td><td><code>getNetworkType()</code></td><td><span class="api">31</span></td><td><span class="status works">PUBLIC</span></td><td>Per-carrier RAT.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="cell-gaps">2.4 What cellular does NOT expose to any app</h2>
+  <ul>
+    <li><strong><code>cellBarred</code>, <code>q-RxLevMin</code>, <code>intraFreqReselection</code>, <code>si-SchedulingInfo</code></strong> (SIB1) — <span class="status dead">NONE</span>. The modem consumes them; no API surfaces them. <code>BarringInfo</code> is the closest and it is your-side, not broadcast.</li>
+    <li><strong>Neighbor SIB lists (SIB4/5/11)</strong> — <span class="status limited">PARTIAL</span>, only if the vendor RIL re-emits neighbors as extra <code>CellInfo</code> rows. Not guaranteed.</li>
+    <li><strong>NR beam ID, BWP, SCS, S-NSSAI slice</strong> — <span class="status dead">NONE</span> (S-NSSAI is NAS-level; beam/BWP are vendor-RIL only). See per-RAT doc §6.5.</li>
+    <li><strong>Raw IQ / PHY samples, forced band scan outside SIM authorization</strong> — <span class="tier aosp">AOSP/HAL</span> only. This is the Pattern-B blind spot from per-RAT §7.</li>
+    <li><strong><code>additionalPlmns</code></strong> (MOCN, LTE/NR) — <span class="status works">PUBLIC</span> at API 30+ (<code>CellIdentityLte/Nr.getAdditionalPlmns()</code>) but currently dropped at ingestion; recommended DDL add.</li>
+  </ul>
+</section>
+
+<!-- ─────────────── §3 ROAMING ─────────────── -->
+<section id="roaming">
+  <h1 class="section"><span class="gen-banner">ROAM</span> 3. Roaming &amp; registration</h1>
+  <p>Roaming state is a first-class corroborator in the rule engine. As of API 34 the authoritative flags moved off the carrier-config-influenced legacy getters onto <code>NetworkRegistrationInfo</code>, which reports raw modem truth. Reach them via <code>ServiceState.getNetworkRegistrationInfoList()</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Notes / analysis use</th></tr></thead>
+    <tbody>
+      <tr><td>Reg-info list (per domain/transport)</td><td><code>ServiceState.getNetworkRegistrationInfoList()</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>CS/PS × WWAN/WLAN entries.</td></tr>
+      <tr><td>Roaming (raw)</td><td><code>NetworkRegistrationInfo.isNetworkRoaming()</code></td><td><span class="api">34</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Not affected by carrier-config override. Feeds <code>ROAMING</code> corroborator.</td></tr>
+      <tr><td>Registered / searching (raw)</td><td><code>isNetworkRegistered()</code> / <code>isNetworkSearching()</code></td><td><span class="api">34</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Detach/search storms → hijack/jam symptom.</td></tr>
+      <tr><td>Registered PLMN (RPLMN)</td><td><code>getRegisteredPlmn()</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Actual serving PLMN vs SIM home PLMN → roaming/anomaly.</td></tr>
+      <tr><td>Registration reject cause</td><td><code>getRejectCause()</code></td><td><span class="api">35</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>3GPP reject code (TS 24.008/24.301/24.501). Repeated rejects → rogue/mis-config cell.</td></tr>
+      <tr><td>Serving cell identity</td><td><code>getCellIdentity()</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Returns null without <code>ACCESS_FINE_LOCATION</code>.</td></tr>
+      <tr><td>Access-network RAT</td><td><code>getAccessNetworkTechnology()</code></td><td><span class="api">30</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Per-registration RAT (can differ CS vs PS).</td></tr>
+      <tr><td>Data-roaming setting</td><td><code>TelephonyManager.isDataRoamingEnabled()</code></td><td><span class="api">29</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>User/policy roaming toggle (distinct from actually roaming).</td></tr>
+      <tr><td>Legacy roaming flag</td><td><code>NetworkRegistrationInfo.isRoaming()</code></td><td><span class="api">30</span> · dep 34</td><td><span class="tier loc">LOCATION</span></td><td><span class="status limited">PARTIAL</span></td><td>Deprecated — carrier-config can override. Use <code>isNetworkRoaming()</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout info"><strong>NTN note.</strong> A satellite (non-terrestrial) leg shows up here too: <code>NetworkRegistrationInfo.isNonTerrestrialNetwork()</code> (API 35) rides on the same reg-info object. Covered in §7.</div>
+</section>
+
+<!-- ─────────────── §4 WIFI ─────────────── -->
+<section id="wifi">
+  <h1 class="section"><span class="gen-banner">WI-FI</span> 4. Wi-Fi</h1>
+  <p>Wi-Fi is the richest non-cellular RF surface an ordinary app gets — full BSSID/SSID/RSSI/channel of every visible AP, plus 802.11mc round-trip ranging. Two constraints dominate: everything AP-identifying is <span class="tier loc">LOCATION</span>-gated, and active scans are throttled.</p>
+
+  <h2 id="wifi-mgr">4.1 WifiManager / ScanResult / WifiInfo</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method / field</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Notes / analysis use</th></tr></thead>
+    <tbody>
+      <tr><td>Latest scan list</td><td><code>WifiManager.getScanResults()</code></td><td><span class="api">1</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>All visible APs. Location + location-services-on required.</td></tr>
+      <tr><td>Scan-complete push</td><td><code>registerScanResultsCallback(...)</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Event-driven refresh instead of polling.</td></tr>
+      <tr><td>Trigger active scan</td><td><code>startScan()</code></td><td><span class="api">1</span> · dep 28</td><td><span class="tier loc">LOCATION</span></td><td><span class="status limited">PARTIAL</span></td><td>Throttled: foreground ≈4 scans/2 min; background far less. Rely on system scans.</td></tr>
+      <tr><td>AP MAC</td><td><code>ScanResult.BSSID</code></td><td><span class="api">1</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Rogue-AP / evil-twin fingerprint; OUI → vendor.</td></tr>
+      <tr><td>SSID</td><td><code>ScanResult.SSID</code></td><td><span class="api">1</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Beacon name; duplicate-SSID/known-SSID checks.</td></tr>
+      <tr><td>RSSI</td><td><code>ScanResult.level</code></td><td><span class="api">1</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>dBm. Positioning + anomalous-power detection.</td></tr>
+      <tr><td>Channel / center freq</td><td><code>frequency</code>, <code>channelWidth</code>, <code>centerFreq0/1</code></td><td><span class="api">1</span>/<span class="api">23</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>2.4/5/6 GHz band, width; spectrum-occupancy view.</td></tr>
+      <tr><td>Security capabilities</td><td><code>ScanResult.capabilities</code></td><td><span class="api">1</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Auth/cipher string; open-AP / downgraded-security flags.</td></tr>
+      <tr><td>Wi-Fi standard</td><td><code>getWifiStandard()</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>11a…11be (Wi-Fi 7).</td></tr>
+      <tr><td>802.11mc responder?</td><td><code>is80211mcResponder()</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Tells you which APs support RTT ranging (see 4.2).</td></tr>
+      <tr><td>Raw beacon IEs</td><td><code>getInformationElements()</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Vendor-specific IEs — deep AP fingerprinting.</td></tr>
+      <tr><td>Connected-link RSSI/rate</td><td><code>WifiInfo.getRssi()</code>, <code>getRxLinkSpeedMbps()</code>, <code>getTxLinkSpeedMbps()</code></td><td><span class="api">1</span>/<span class="api">29</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Live link quality of the connected AP.</td></tr>
+      <tr><td>Connected security type</td><td><code>WifiInfo.getCurrentSecurityType()</code></td><td><span class="api">31</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Detect downgrade to open/weak.</td></tr>
+      <tr><td>How to read WifiInfo now</td><td><code>NetworkCapabilities.getTransportInfo()</code> → <code>WifiInfo</code></td><td><span class="api">31</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td><code>getConnectionInfo()</code> deprecated at 31; use the callback path.</td></tr>
+      <tr><td>Wi-Fi 7 MLO links</td><td><code>getAffiliatedMloLinks()</code>, <code>getApMldMacAddress()</code></td><td><span class="api">33</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Multi-link identity for 11be APs.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="wifi-rtt">4.2 WifiRttManager — 802.11mc round-trip ranging</h2>
+  <p>Physical distance to any RTT-capable AP, in millimetres — a hard geometric fact you can cross-check against GNSS and cell-TA position. Needs <code>FEATURE_WIFI_RTT</code>, <code>ACCESS_FINE_LOCATION</code> + <code>CHANGE_WIFI_STATE</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method / field</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Start ranging</td><td><code>WifiRttManager.startRanging(RangingRequest, …)</code></td><td><span class="api">28</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Add APs via <code>RangingRequest.Builder.addAccessPoint(ScanResult)</code>.</td></tr>
+      <tr><td>Distance</td><td><code>RangingResult.getDistanceMm()</code></td><td><span class="api">28</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Positioning; movement-vs-static integrity check.</td></tr>
+      <tr><td>Distance std-dev</td><td><code>getDistanceStdDevMm()</code></td><td><span class="api">28</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Confidence weighting.</td></tr>
+      <tr><td>Per-AP RSSI + success count</td><td><code>getRssi()</code>, <code>getNumSuccessfulMeasurements()</code></td><td><span class="api">28</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Quality gating of each responder.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="wifi-gaps">4.3 What Wi-Fi does NOT expose</h2>
+  <ul>
+    <li><strong>Device Wi-Fi MAC</strong> — <span class="status limited">PARTIAL</span>. Randomized per-network; apps read <code>02:00:00:00:00:00</code>. True MAC is <span class="tier system">SYSTEM</span>.</li>
+    <li><strong>Monitor mode / raw 802.11 frame capture</strong> — <span class="status dead">NONE</span>. No packet-injection or promiscuous capture from an app; needs <span class="tier aosp">AOSP/HAL</span> or external adapter.</li>
+    <li><strong>Unthrottled continuous scanning</strong> — <span class="status limited">PARTIAL</span>. Scan cadence is rate-limited by the framework; only a privileged app can bypass throttling.</li>
+    <li><strong>Neighbor-AP CSI / per-subcarrier</strong> — <span class="status dead">NONE</span> in public API.</li>
+  </ul>
+</section>
+
+<!-- ─────────────── §5 GNSS ─────────────── -->
+<section id="gnss">
+  <h1 class="section"><span class="gen-banner">GNSS</span> 5. GNSS &amp; location</h1>
+  <p>GNSS is the strongest anomaly surface Android hands a normal app: <strong>raw pseudorange, carrier-phase (ADR), per-SV C/N0, automatic-gain-control level, navigation messages and clock</strong> are all public. This is exactly the substrate for spoofing/jamming integrity checks. All raw-measurement access is <span class="tier loc">LOCATION</span> (fine) and requires the device to support the measurement HAL.</p>
+
+  <h2 id="gnss-mgr">5.1 LocationManager entry points</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Raw measurements stream</td><td><code>registerGnssMeasurementsCallback(...)</code></td><td><span class="api">24</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Delivers <code>GnssMeasurementsEvent</code>. API 31 adds <code>GnssMeasurementRequest</code> (full-tracking).</td></tr>
+      <tr><td>SV status stream</td><td><code>registerGnssStatusCallback(...)</code></td><td><span class="api">24</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Per-SV <code>GnssStatus</code> (see 5.3).</td></tr>
+      <tr><td>Nav-message stream</td><td><code>registerGnssNavigationMessageCallback(...)</code></td><td><span class="api">24</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Raw broadcast nav bits.</td></tr>
+      <tr><td>Antenna info</td><td><code>registerAntennaInfoListener(...)</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Phase-center offsets/corrections.</td></tr>
+      <tr><td>Capabilities probe</td><td><code>getGnssCapabilities()</code></td><td><span class="api">30</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Which of measurements/nav/AGC/antenna/SatellitePVT this chipset supports.</td></tr>
+      <tr><td>HW model / year</td><td><code>getGnssHardwareModelName()</code>, <code>getGnssYearOfHardware()</code></td><td><span class="api">28</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Fleet capability segmentation.</td></tr>
+      <tr><td>Location fix stream</td><td><code>requestLocationUpdates(...)</code> / <code>getCurrentLocation(...)</code></td><td><span class="api">1</span>/<span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Fused fixes; carries mock flag (5.4).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="gnss-raw">5.2 GnssMeasurement — the raw fields (all PUBLIC, <span class="tier loc">LOCATION</span>)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Field</th><th>Method</th><th>Since</th><th>Anomaly relevance</th></tr></thead>
+    <tbody>
+      <tr><td>Carrier-to-noise density</td><td><code>getCn0DbHz()</code></td><td><span class="api">24</span></td><td>Spoofing often yields abnormally uniform/high C/N0 across SVs.</td></tr>
+      <tr><td>Baseband C/N0</td><td><code>getBasebandCn0DbHz()</code></td><td><span class="api">30</span></td><td>Pre-antenna value; jamming pushes it down.</td></tr>
+      <tr><td>Automatic Gain Control</td><td><code>GnssAutomaticGainControl.getLevelDb()</code> (via event)</td><td><span class="api">34</span></td><td><strong>Primary jamming indicator</strong> — AGC swings hard under RF interference. Per-frequency, per-constellation.</td></tr>
+      <tr><td>Accumulated delta range (carrier phase)</td><td><code>getAccumulatedDeltaRangeMeters()</code> + state</td><td><span class="api">24</span></td><td>Carrier-phase continuity; spoof transitions break ADR state.</td></tr>
+      <tr><td>Pseudorange rate</td><td><code>getPseudorangeRateMetersPerSecond()</code></td><td><span class="api">24</span></td><td>Doppler consistency vs known SV geometry.</td></tr>
+      <tr><td>Carrier frequency</td><td><code>getCarrierFrequencyHz()</code></td><td><span class="api">24</span></td><td>L1/L5 dual-frequency cross-check (harder to spoof both).</td></tr>
+      <tr><td>SV id / constellation</td><td><code>getSvid()</code>, <code>getConstellationType()</code></td><td><span class="api">24</span></td><td>GPS/GLONASS/Galileo/BeiDou/QZSS/IRNSS/SBAS mix consistency.</td></tr>
+      <tr><td>Received SV time</td><td><code>getReceivedSvTimeNanos()</code></td><td><span class="api">24</span></td><td>Time-solution sanity.</td></tr>
+      <tr><td>Multipath indicator</td><td><code>getMultipathIndicator()</code></td><td><span class="api">24</span></td><td>Environment plausibility.</td></tr>
+      <tr><td>Satellite PVT</td><td><code>getSatellitePvt()</code></td><td><span class="api">34</span></td><td>Per-SV position/velocity/clock — geometric spoof test. (Chipset-dependent; probe caps.)</td></tr>
+      <tr><td>Inter-signal bias</td><td><code>getFullInterSignalBiasNanos()</code></td><td><span class="api">34</span></td><td>Precise multi-constellation timing.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="gnss-status">5.3 GnssStatus / GnssClock / GnssNavigationMessage</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Object</th><th>Key methods</th><th>Since</th><th>Exposed</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td><code>GnssStatus</code></td><td><code>getCn0DbHz()</code>, <code>getBasebandCn0DbHz()</code>, <code>usedInFix()</code>, <code>hasEphemerisData()</code>, <code>hasAlmanacData()</code>, <code>getAzimuthDegrees()</code>, <code>getElevationDegrees()</code>, <code>getCarrierFrequencyHz()</code></td><td><span class="api">24</span>/<span class="api">30</span></td><td><span class="status works">PUBLIC</span></td><td>Sky map + which SVs are actually used; sudden all-SV changes = spoof onset.</td></tr>
+      <tr><td><code>GnssClock</code></td><td><code>getBiasNanos()</code>, <code>getDriftNanosPerSecond()</code>, <code>getHardwareClockDiscontinuityCount()</code>, <code>getLeapSecond()</code></td><td><span class="api">24</span></td><td><span class="status works">PUBLIC</span></td><td>Clock-drift jumps and discontinuities flag spoof/receiver reset.</td></tr>
+      <tr><td><code>GnssNavigationMessage</code></td><td><code>getType()</code>, <code>getData()</code>, <code>getStatus()</code>, <code>getSvid()</code></td><td><span class="api">24</span></td><td><span class="status works">PUBLIC</span></td><td>Compare broadcast ephemeris across SVs / against reference; message-integrity checks.</td></tr>
+      <tr><td><code>GnssAntennaInfo</code></td><td>phase-center offset &amp; variation</td><td><span class="api">30</span></td><td><span class="status works">PUBLIC</span></td><td>High-precision correction; chipset-dependent.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="gnss-spoof">5.4 Mock &amp; spoofing detection</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method</th><th>Since</th><th>Exposed</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Fix is mock</td><td><code>Location.isMock()</code></td><td><span class="api">31</span></td><td><span class="status works">PUBLIC</span></td><td>Direct on-device mock-provider flag (replaces <code>isFromMockProvider()</code>).</td></tr>
+      <tr><td>Fix age / monotonic time</td><td><code>getElapsedRealtimeNanos()</code>, <code>getElapsedRealtimeUncertaintyNanos()</code></td><td><span class="api">17</span>/<span class="api">29</span></td><td><span class="status works">PUBLIC</span></td><td>Replay/stale-fix detection.</td></tr>
+      <tr><td>Accuracy fields</td><td><code>getAccuracy()</code>, <code>getVerticalAccuracyMeters()</code>, <code>getSpeedAccuracyMetersPerSecond()</code>, <code>getBearingAccuracyDegrees()</code></td><td><span class="api">26</span></td><td><span class="status works">PUBLIC</span></td><td>Implausible-precision spoof heuristics.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout good"><strong>This is your GPS_SPOOFING / jamming goldmine.</strong> Combine AGC drop (jamming) + C/N0 uniformity + ADR-state breaks + clock discontinuity + constellation mix + <code>isMock()</code> into a per-device GNSS-integrity score, and cross-check the resulting position against cell-TA and Wi-Fi-RTT geometry. None of it needs privilege beyond fine location.</div>
+</section>
+
+<!-- ─────────────── §6 QOS ─────────────── -->
+<section id="qos">
+  <h1 class="section"><span class="gen-banner">QoS</span> 6. Quality of Service</h1>
+  <p>Two very different surfaces sit under "QoS", and the split is the whole story. <strong>Detailed 3GPP QoS session attributes</strong> (QCI, 5QI, QFI, guaranteed/maximum bit-rate) are delivered by the <code>QosCallback</code> API — which is <code>@SystemApi</code> and therefore <span class="tier system">SYSTEM</span>-only. A normal app cannot register it (both <code>android.net.QosCallback</code> and <code>NrQosSessionAttributes</code> are absent from the public SDK). What a normal app <em>can</em> use is the <strong>coarse link view</strong> from <code>NetworkCapabilities</code> plus any latency/jitter/loss it measures itself.</p>
+
+  <h2 id="qos-caps">6.1 NetworkCapabilities — coarse link QoS (the public path)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Estimated link bandwidth</td><td><code>getLinkDownstreamBandwidthKbps()</code> / <code>...Upstream...()</code></td><td><span class="api">21</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Coarse capacity estimate per network.</td></tr>
+      <tr><td>Signal strength (per network)</td><td><code>getSignalStrength()</code></td><td><span class="api">29</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Unified metric across Wi-Fi/cell.</td></tr>
+      <tr><td>Capability flags</td><td><code>hasCapability(NET_CAPABILITY_*)</code></td><td><span class="api">21</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Validated/metered/not-suspended etc.</td></tr>
+      <tr><td>Transport info</td><td><code>getTransportInfo()</code></td><td><span class="api">29</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Cast to <code>WifiInfo</code> for the connected AP.</td></tr>
+      <tr><td>Own-flow byte counters</td><td><code>TrafficStats</code> / <code>NetworkStatsManager</code></td><td><span class="api">1</span>/<span class="api">23</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Throughput by counting bytes over time; no QoS class.</td></tr>
+      <tr><td>Latency / jitter / loss</td><td>app-measured (timestamped echo / RTT probe)</td><td>—</td><td><span class="tier normal">NORMAL</span></td><td><span class="status limited">MEASURE</span></td><td>No OS API — the SDK must probe and compute.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="qos-cb">6.2 QosCallback / QosSession — detailed 3GPP QoS (SystemApi, API 31)</h2>
+  <p>Delivers real EPS-bearer / 5G-flow QoS attributes for a socket your app owns: bind a socket, wrap it in <code>QosSocketInfo</code>, register a <code>QosCallback</code>, and the framework reports the bearer serving that flow. <strong>The entire API is <code>@SystemApi</code></strong> — <code>android.net.QosCallback</code>, <code>QosSession</code>, <code>EpsBearerQosSessionAttributes</code> and <code>NrQosSessionAttributes</code> do not appear in the public SDK, so this whole block is <span class="status dead">NONE</span> for a Play-Store SDK and requires a privileged fleet build.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method / field</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Register for QoS on a socket</td><td><code>ConnectivityManager.registerQosCallback(QosSocketInfo, Executor, QosCallback)</code></td><td><span class="api">31</span></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td><td>Scope = the socket's flow only. SystemApi.</td></tr>
+      <tr><td>Session available / lost</td><td><code>QosCallback.onQosSessionAvailable(...)</code> / <code>onQosSessionLost(...)</code></td><td><span class="api">31</span></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td><td>Bearer setup/teardown events.</td></tr>
+      <tr><td>Session id / type</td><td><code>QosSession.getSessionId()</code>, <code>getSessionType()</code></td><td><span class="api">31</span></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td><td><code>TYPE_EPS_BEARER</code> (LTE) / <code>TYPE_NR_BEARER</code> (5G).</td></tr>
+      <tr><td>LTE bearer QoS</td><td><code>EpsBearerQosSessionAttributes</code>: <code>getQosIdentifier()</code> (QCI), bandwidth getters</td><td><span class="api">31</span></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td><td>QCI + GBR/MBR of the serving EPS bearer.</td></tr>
+      <tr><td>5G flow QoS</td><td><code>NrQosSessionAttributes</code>: <code>getQosIdentifier()</code> (5QI), <code>getQosFlowIdentifier()</code> (QFI), bandwidth getters</td><td><span class="api">31</span></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td><td>5QI + QFI + GBR/MBR of the 5G QoS flow.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="qos-gaps">6.3 What QoS does NOT expose</h2>
+  <ul>
+    <li><strong>3GPP QoS class (QCI / 5QI / QFI / GBR-MBR) on a consumer app</strong> — <span class="status dead">NONE</span>. The <code>QosCallback</code> API that carries it is <code>@SystemApi</code>; only a privileged build can read it (§6.2).</li>
+    <li><strong>QoS of other apps / the whole device</strong> — <span class="status dead">NONE</span> even with the SystemApi. Callback scope is a single owned socket.</li>
+    <li><strong>End-to-end latency / jitter / loss</strong> — <span class="status dead">NONE</span> as an API on any tier. The SDK must <em>measure</em> it (RTT probes, timestamped echo).</li>
+    <li><strong>Per-flow throughput class</strong> — <span class="status limited">PARTIAL</span>; <code>TrafficStats</code>/<code>NetworkStatsManager</code> give byte counts (public), not the QoS class.</li>
+  </ul>
+</section>
+
+<!-- ─────────────── §7 SATELLITE ─────────────── -->
+<section id="sat">
+  <h1 class="section"><span class="gen-banner">SAT</span> 7. Satellite — Direct-to-Cell / NTN</h1>
+  <p><strong>This is the sharpest exposed-vs-not boundary in the whole surface.</strong> Android added a native satellite framework in Android 15 (API 35) and a small public <code>SatelliteManager</code> in Android 16 (API 36) — but almost the entire capability is <span class="tier system">SYSTEM</span>. A normal app can <em>detect</em> that it is on a non-terrestrial network and be told the satellite <em>state may have changed</em>; it cannot provision, message, point, or read NTN signal strength.</p>
+
+  <h2 id="sat-public">7.1 Public surface (what a NORMAL app actually gets)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Satellite state-change listener</td><td><code>SatelliteManager.registerStateChangeListener(Executor, SatelliteStateChangeListener)</code></td><td><span class="api">36</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status limited">PARTIAL</span></td><td>Requires <code>READ_PHONE_STATE</code>/<code>READ_BASIC_PHONE_STATE</code>/<code>READ_PRIVILEGED_PHONE_STATE</code> or carrier privileges. Callback says state <em>may</em> have changed — coarse.</td></tr>
+      <tr><td>Unregister</td><td><code>unregisterStateChangeListener(...)</code></td><td><span class="api">36</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status limited">PARTIAL</span></td><td>Pair with the above.</td></tr>
+      <tr><td>Low-bandwidth app hint</td><td><code>PROPERTY_SATELLITE_DATA_OPTIMIZED</code> (manifest meta-data)</td><td><span class="api">36.1</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Marks the app as satellite-data-optimized so the platform routes it over the constrained NTN link.</td></tr>
+      <tr><td>Feature probe</td><td><code>PackageManager.hasSystemFeature(FEATURE_TELEPHONY_SATELLITE)</code></td><td><span class="api">35</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">PUBLIC</span></td><td>Does this device support satellite at all.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="sat-detect">7.2 NTN detection via the telephony reg surface (API 35, LOCATION)</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method</th><th>Since</th><th>Tier</th><th>Exposed</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>On a non-terrestrial network?</td><td><code>NetworkRegistrationInfo.isNonTerrestrialNetwork()</code></td><td><span class="api">35</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Boolean per registration. The reliable "am I on satellite" signal for a normal app.</td></tr>
+      <tr><td>Service state NTN flag</td><td><code>ServiceState.isUsingNonTerrestrialNetwork()</code></td><td><span class="api">35</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Aggregate NTN indicator at the service-state level.</td></tr>
+      <tr><td>Available services on NTN</td><td><code>NetworkRegistrationInfo.getAvailableServices()</code></td><td><span class="api">30</span></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">PUBLIC</span></td><td>Often SMS/emergency-only on satellite; contrast with terrestrial.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="sat-system">7.3 System-only surface (privileged/AOSP fleet build)</h2>
+  <p>The rich <code>SatelliteManager</code> capability is <span class="tier system">SYSTEM</span> — <code>@SystemApi</code>, gated behind <code>SATELLITE_COMMUNICATION</code> (signature|privileged). It is <span class="status dead">NONE</span> for a Play-Store SDK and becomes usable only in a privileged fleet build. Representative capability (names are the AOSP SystemApi shape; verify against your exact platform version):</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Capability</th><th>Method (SystemApi)</th><th>Tier</th><th>Exposed to app?</th></tr></thead>
+    <tbody>
+      <tr><td>Is satellite supported / enabled / provisioned</td><td><code>requestIsSupported(...)</code>, <code>requestIsEnabled(...)</code>, <code>requestIsProvisioned(...)</code></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td></tr>
+      <tr><td>Capabilities (modes, max datagram)</td><td><code>requestCapabilities(...)</code></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td></tr>
+      <tr><td>Modem state changes</td><td><code>registerForModemStateChanged(...)</code></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td></tr>
+      <tr><td>Send / receive datagrams (messaging)</td><td><code>sendDatagram(...)</code>, <code>pollPendingDatagrams(...)</code>, <code>registerForIncomingDatagram(...)</code></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td></tr>
+      <tr><td>NTN signal strength</td><td><code>requestNtnSignalStrength(...)</code>, <code>registerForNtnSignalStrengthChanged(...)</code></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td></tr>
+      <tr><td>Antenna pointing / visibility window</td><td><code>startTransmissionUpdates(...)</code>, <code>requestTimeForNextSatelliteVisibility(...)</code></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td></tr>
+      <tr><td>Comms-allowed for current location</td><td><code>requestIsCommunicationAllowedForCurrentLocation(...)</code></td><td><span class="tier system">SYSTEM</span></td><td><span class="status dead">NONE</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>What is invisible even to system apps</h3>
+  <ul>
+    <li><strong>SIB19 NTN configuration</strong> (satellite ephemeris, common TA / propagation-delay compensation, epoch) — <span class="tier aosp">AOSP/HAL</span>. Lives in the modem; not surfaced by <code>SatelliteManager</code>. Same class of gap as <code>cellBarred</code>.</li>
+    <li><strong>Raw NTN doppler / per-beam measurements</strong> — <span class="status dead">NONE</span>. Only the aggregate NTN signal strength (system) is offered.</li>
+  </ul>
+  <div class="callout warn"><strong>Practical takeaway for FlycommC2.</strong> On a consumer SDK, treat satellite as a <em>detection-only</em> domain: log <code>isNonTerrestrialNetwork()</code> transitions and available-service contraction, and correlate with GNSS/cell context. Any active satellite sensing (signal quality, datagram, pointing, SIB19) requires a privileged fleet build or dedicated NTN hardware — mirror the SDK-vs-RSU split you already document for unlicensed-band.</div>
+</section>
+
+<!-- ─────────────── §8 V2X ─────────────── -->
+<section id="v2x">
+  <h1 class="section"><span class="gen-banner">V2X</span> 8. V2X (C-V2X / PC5 sidelink)</h1>
+  <p><strong>There is no public Android API for C-V2X.</strong> Direct sidelink (PC5) — the BSM/CAM/DENM short-range vehicle messaging layer — is not exposed at the app level in AOSP. The Automotive stack (<code>android.car</code>) surfaces vehicle <em>properties</em>, not V2X radio access. This is a hard structural gap, not a permission gate.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Path</th><th>What it is</th><th>Tier</th><th>Exposed</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>PC5 sidelink (direct)</td><td>3GPP sidelink BSM/CAM/DENM</td><td><span class="tier aosp">AOSP/HAL</span></td><td><span class="status dead">NONE</span></td><td>No public API. Requires vendor C-V2X modem SDK / HAL (Qualcomm, Autotalks, Cohda) or an external OBU.</td></tr>
+      <tr><td>Uu-based V2X (V2N)</td><td>Network-routed V2X over cellular data</td><td><span class="tier normal">NORMAL</span></td><td><span class="status limited">PARTIAL</span></td><td>Just IP traffic — visible only as ordinary connectivity, no V2X semantics from the OS.</td></tr>
+      <tr><td>Automotive properties</td><td><code>CarPropertyManager</code> etc.</td><td><span class="tier system">SYSTEM</span></td><td><span class="status na">N/A</span></td><td>Vehicle telemetry, not V2X messaging. Only on Automotive OS builds.</td></tr>
+      <tr><td>External OBU/RSU over IP</td><td>Dedicated C-V2X unit ↔ SDK via LAN/USB</td><td>—</td><td><span class="status works">PUBLIC</span></td><td>Recommended path: the OBU does PC5, the SDK ingests decoded messages over a normal socket.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout info"><strong>Recommendation.</strong> If V2X sensing is in scope, architect it as an <em>external-hardware ingestion</em> feature (OBU/RSU streams decoded messages to the SDK), not as an on-handset radio capability. Nothing on a stock Android phone will give you PC5.</div>
+</section>
+
+<!-- ─────────────── §9 MATRIX ─────────────── -->
+<section id="matrix">
+  <h1 class="section">9. Exposed-vs-invisible master matrix</h1>
+  <p>One row per domain: the best a consumer SDK can do vs what needs privilege/hardware. Use this to scope the SDK core vs the privileged extension module.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Domain</th><th>NORMAL / LOCATION app</th><th>CARRIER</th><th>SYSTEM</th><th>AOSP / HAL / HW</th></tr></thead>
+    <tbody>
+      <tr><td>Cellular identity &amp; signal</td><td><span class="status works">PUBLIC</span> full CellInfo + PhysicalChannelConfig</td><td><span class="status works">+ network scan</span></td><td><span class="status works">+ RAT control</span></td><td>+ raw IQ, forced band scan, cellBarred</td></tr>
+      <tr><td>Roaming / registration</td><td><span class="status works">PUBLIC</span> raw reg flags, reject cause, RPLMN</td><td><span class="status na">—</span></td><td><span class="status na">—</span></td><td><span class="status na">—</span></td></tr>
+      <tr><td>Wi-Fi</td><td><span class="status works">PUBLIC</span> scan, RSSI, RTT (throttled)</td><td><span class="status na">—</span></td><td><span class="status works">+ true MAC, unthrottled</span></td><td>+ monitor mode / frame capture</td></tr>
+      <tr><td>GNSS</td><td><span class="status works">PUBLIC</span> raw meas, AGC, nav msg, mock flag</td><td><span class="status na">—</span></td><td><span class="status na">—</span></td><td>+ chipset-internal only</td></tr>
+      <tr><td>QoS</td><td><span class="status works">PUBLIC</span> coarse link + self-measured</td><td><span class="status na">—</span></td><td><span class="status limited">+ 3GPP QoS attrs (own flow)</span></td><td><span class="status na">—</span></td></tr>
+      <tr><td>Satellite / NTN</td><td><span class="status limited">PARTIAL</span> detect only (flag + state listener)</td><td><span class="status limited">+ state via priv</span></td><td><span class="status dead">full SatelliteManager</span></td><td>+ SIB19 ephemeris (none)</td></tr>
+      <tr><td>V2X (PC5)</td><td><span class="status dead">NONE</span></td><td><span class="status dead">NONE</span></td><td><span class="status dead">NONE</span></td><td>Vendor SDK / external OBU only</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ─────────────── §10 ANALYSIS ─────────────── -->
+<section id="analysis">
+  <h1 class="section">10. Analysis mapping — which functions feed which detection</h1>
+  <p>Wiring the catalog to FlycommC2's analytic goals. Anomaly, QoS and GNSS-integrity all draw from the green tiers, so the core SDK covers most of the mission on a consumer build.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Analytic goal</th><th>Primary inputs (API)</th><th>Best tier</th><th>Feasibility</th></tr></thead>
+    <tbody>
+      <tr><td>Fake / rogue cell</td><td>CellInfo identity, PhysicalChannelConfig band, <code>additionalPlmns</code>, reject cause, reselection churn</td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">STRONG</span></td></tr>
+      <tr><td>Unlicensed band (Pattern A)</td><td><code>PhysicalChannelConfig.getBand()</code>, <code>CellIdentity.getBands()</code></td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">STRONG</span></td></tr>
+      <tr><td>Unlicensed band (Pattern B)</td><td>Forced band scan / multi-SIM correlation</td><td><span class="tier carrier">CARRIER</span>/<span class="tier aosp">HW</span></td><td><span class="status limited">LIMITED</span></td></tr>
+      <tr><td>Jamming (RF)</td><td>Cell RSRP/RSRQ/SINR series + <strong>GNSS AGC level</strong> + baseband C/N0</td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">STRONG</span></td></tr>
+      <tr><td>GPS spoofing</td><td>C/N0 uniformity, ADR-state, clock discontinuity, constellation mix, SatellitePVT, <code>isMock()</code>, cross-check vs cell-TA &amp; Wi-Fi-RTT</td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">STRONG</span></td></tr>
+      <tr><td>Network downgrade</td><td><code>getDataNetworkType()</code>, <code>TelephonyDisplayInfo</code>, reg RAT</td><td><span class="tier normal">NORMAL</span></td><td><span class="status works">STRONG</span></td></tr>
+      <tr><td>QoS degradation</td><td>NetworkCapabilities bandwidth + self-measured RTT/loss (public); EPS/NR QoS attrs only on <span class="tier system">SYSTEM</span></td><td><span class="tier normal">NORMAL</span></td><td><span class="status limited">PARTIAL</span> (coarse; class needs SYSTEM)</td></tr>
+      <tr><td>Satellite/NTN presence</td><td><code>isNonTerrestrialNetwork()</code>, service contraction, state listener</td><td><span class="tier loc">LOCATION</span></td><td><span class="status limited">DETECT-ONLY</span></td></tr>
+      <tr><td>Rogue Wi-Fi AP / evil twin</td><td>BSSID/OUI, capabilities, IEs, RTT distance</td><td><span class="tier loc">LOCATION</span></td><td><span class="status works">STRONG</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ─────────────── §11 RECS ─────────────── -->
+<section id="recs">
+  <h1 class="section">11. SDK build recommendations</h1>
+  <p><strong>11.1 Two-layer SDK.</strong> Core targets <span class="tier normal">NORMAL</span>+<span class="tier loc">LOCATION</span> and delivers cellular, Wi-Fi, GNSS, roaming and coarse/self-measured QoS at full fidelity. A privileged extension module (compiled against the SystemApi stubs, active only when the host build grants it) lights up satellite control, the 3GPP QoS-attribute callback, forced band scans and RAT control. This mirrors the SDK-vs-RSU split already documented for unlicensed-band.</p>
+  <p><strong>11.2 Prefer callback surfaces over polling.</strong> <code>TelephonyCallback</code>, <code>registerScanResultsCallback</code>, GNSS measurement callbacks and <code>SignalStrengthUpdateRequest</code> give event-driven, battery-cheap streams. Reserve <code>requestCellInfoUpdate</code>/<code>getScanResults</code> polling for forced refreshes.</p>
+  <p><strong>11.3 Treat GNSS AGC + raw measurements as a first-class sensor.</strong> They are public (API 34 for AGC) and are the single best jamming/spoofing signal on the device. Probe <code>getGnssCapabilities()</code> at startup and record which fields the chipset supports so analysis can branch per-device.</p>
+  <p><strong>11.4 Guard every API-level and privilege branch.</strong> Floor is API 33, but AGC is 35-effective-via-34, satellite public is 36, NTN flag is 35. Feature-detect (<code>hasSystemFeature</code>, capability probes, <code>Build.VERSION.SDK_INT</code>) rather than assuming; degrade to <span class="status limited">PARTIAL</span> cleanly.</p>
+  <p><strong>11.5 Externalize V2X.</strong> No handset path exists for PC5. If in scope, ingest from an external OBU/RSU over a socket; do not design for on-device sidelink.</p>
+  <p><strong>11.6 Record the tier per sample.</strong> Persist which privilege tier produced each observation (as you persist <code>appManipulated</code>). Analysts then know whether a silent rule is a real negative or a coverage gap — the same "silent rule" problem flagged in the per-RAT doc.</p>
+</section>
+
+<!-- ─────────────── APPENDIX ─────────────── -->
+<section id="appendix">
+  <h1 class="section">Appendix — permissions &amp; API-level cheat-sheet</h1>
+
+  <h3>Permission → capability</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Permission</th><th>Protection</th><th>Unlocks</th></tr></thead>
+    <tbody>
+      <tr><td><code>ACCESS_FINE_LOCATION</code></td><td>runtime</td><td>Cell identity, Wi-Fi scan identity, GNSS raw, RTT, NTN reg flags.</td></tr>
+      <tr><td><code>READ_PHONE_STATE</code></td><td>runtime</td><td>RAT, signal, service state, satellite state listener.</td></tr>
+      <tr><td><code>ACCESS_WIFI_STATE</code> / <code>CHANGE_WIFI_STATE</code></td><td>normal</td><td>Wi-Fi scan results / trigger scan &amp; RTT.</td></tr>
+      <tr><td><code>READ_BASIC_PHONE_STATE</code></td><td>runtime (33+)</td><td>Lighter-weight phone/satellite state reads.</td></tr>
+      <tr><td>Carrier privileges (UICC)</td><td>SIM rules</td><td>Network scan, some telephony reads/controls without signing.</td></tr>
+      <tr><td><code>MODIFY_PHONE_STATE</code></td><td>signature</td><td>Preferred RAT / network selection (SYSTEM).</td></tr>
+      <tr><td><code>SATELLITE_COMMUNICATION</code></td><td>signature|privileged</td><td>Full <code>SatelliteManager</code> (SYSTEM).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Key since-API milestones (verified against current Android reference)</h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th>API</th><th>Release</th><th>Relevant additions in this doc</th></tr></thead>
+    <tbody>
+      <tr><td>29</td><td>Android 10</td><td><code>requestCellInfoUpdate</code>, Wi-Fi Rx/Tx link speed, NetworkCapabilities signal strength.</td></tr>
+      <tr><td>30</td><td>Android 11</td><td>NetworkRegistrationInfo list, GNSS antenna/capabilities, Wi-Fi standard &amp; IEs, <code>additionalPlmns</code>.</td></tr>
+      <tr><td>31</td><td>Android 12</td><td><code>TelephonyCallback</code>, PhysicalChannelConfig public, QoS callbacks (EPS/NR attrs), <code>Location.isMock()</code>, GnssMeasurementRequest.</td></tr>
+      <tr><td>33</td><td>Android 13</td><td>Doc floor; Wi-Fi 7 MLO fields.</td></tr>
+      <tr><td>34</td><td>Android 14</td><td>Raw reg flags (<code>isNetworkRoaming</code> etc.), GNSS AGC object, SatellitePVT, inter-signal bias.</td></tr>
+      <tr><td>35</td><td>Android 15</td><td>Satellite framework; <code>isNonTerrestrialNetwork()</code>, <code>ServiceState.isUsingNonTerrestrialNetwork()</code>, <code>getRejectCause()</code>.</td></tr>
+      <tr><td>36</td><td>Android 16</td><td>Public <code>SatelliteManager</code> (state-change listener), <code>PROPERTY_SATELLITE_DATA_OPTIMIZED</code>.</td></tr>
+    </tbody>
+  </table></div>
+  <p style="color:var(--text-muted);font-size:12.5px;">SystemApi method names in §7.3 reflect the AOSP satellite framework shape and should be pinned to your exact target platform version before implementation — the <code>@SystemApi</code> surface is not covered by the public developer.android.com reference and evolves per release.</p>
+</section>
+
+<footer>
+  FlycommC2 SOC — internal R&amp;D reference. Companion to <em>Cell Observation Sequence per RAT</em>. Privilege tiers and since-API levels verified against the current Android developer reference (July 2026); re-verify SystemApi satellite surface against the target platform build before implementation.
+</footer>
+
+</main>
+</div>
+</body>
+</html>
